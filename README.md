@@ -1,67 +1,78 @@
+# 🛠️ HOI4 Dowser Launcher Fix (Windows 11)
+
+This project provides a workaround for an issue with the **Hearts of Iron IV (HOI4)** launcher (`dowser.exe`) on **Windows 11** (24H2 in my case).  
+While other Paradox games (EU4, CK3, etc.) can be fixed by adding the `--in-process-gpu` launch option, HOI4 uses its own **dedicated dowser** instead of the shared Paradox launcher, which breaks this method.
+
+👉 With this fix, you can **launch HOI4 with the official launcher, mods, and Steam features** working properly.
 
 ---
 
-## 2) `README.md` for GitHub repo (complete, step-by-step)
+## ⚡ Tested Requirements
 
-```
-# hoi4-dowser-wrapper
-**Unofficial workaround** to make the Paradox HOI4 launcher run under certain Windows 11 setups by launching the original `dowser.exe` with `--in-process-gpu`.
-
-> ⚠️ **Disclaimer:** This is an unsupported community workaround. Use at your own risk. Always backup original files. Do not redistribute the original `dowser.exe`. Share only scripts/source/wrapper code.
-
----
-
-## Overview
-Some users have reported that the Hearts of Iron IV Paradox launcher (`dowser.exe`) refuses to open correctly on Windows 11 after an update, while launching `hoi4.exe` directly works (but without Steam/mod integration). This repo documents a practical workaround: replace the `dowser.exe` file with a small wrapper that executes the original `dowser_original.exe` with the `--in-process-gpu` argument. This often makes the launcher initialize correctly via Steam and restores mod/Steam functions.
+- 💻 **CPU:** Intel i7 6700k  
+- 🎮 **GPU:** NVIDIA GTX 1060  
+- 🖥️ **OS:** Windows 11 24H2  
+- ⚠️ The issue may also happen on other hardware with Windows 11  
 
 ---
 
-## Table of contents
-- [Prerequisites](#prerequisites)
-- [How it works](#how-it-works)
-- [Option A: Inno Setup wrapper (used by author)](#option-a-inno-setup-wrapper-used-by-author)
-- [Option B: C# single-file wrapper (recommended)](#option-b-c-single-file-wrapper-recommended)
-- [Install steps](#install-steps)
-- [Rollback / restore original files](#rollback--restore-original-files)
-- [Troubleshooting & tips](#troubleshooting--tips)
-- [Logs & diagnostics to collect](#logs--diagnostics-to-collect)
-- [License & credits](#license--credits)
+## 📖 Step-by-step guide
+
+### 1. Backup the original dowser
+1. Navigate to your HOI4 installation folder (usually:  
+   `C:\Program Files (x86)\Steam\steamapps\common\Hearts of Iron IV\`)
+2. Rename `dowser.exe` → `dowser_original.exe`  
+   This keeps a safe backup in case you need to restore it.
 
 ---
 
-## Prerequisites
-- Windows 10/11 PC with HOI4 installed via Steam.
-- Admin rights to modify files in the game folder.
-- One of:
-  - [Inno Setup](https://jrsoftware.org/isdl.php) (to compile the `.iss` script), **or**
-  - [.NET SDK (6/7/8+)](https://dotnet.microsoft.com/) to compile the C# wrapper.
+### 2. Use the custom replacement dowser
+1. Download the provided **replacement `dowser.exe`** from this repository (compiled with Inno Setup).  
+2. Place it inside the HOI4 installation folder (next to `hoi4.exe`).  
+3. This replacement simply forwards the command with the required parameter:
+--in-process-gpu
+
+
+ensuring the launcher opens correctly.
 
 ---
 
-## How it works
-1. You rename the original `dowser.exe` to `dowser_original.exe`.
-2. You replace `dowser.exe` with a wrapper executable.
-3. When Steam executes `dowser.exe`, the wrapper immediately starts `dowser_original.exe` with `--in-process-gpu` and exits.
-4. The original launcher runs with the extra parameter and (in many reported cases) initializes correctly, giving full Steam/mod functionality.
+### 3. Launch the game via Steam
+- Run HOI4 normally from Steam.  
+- The custom dowser will start, pass the correct flags, and load the launcher with **mods and online features** enabled. 🎉
 
 ---
 
-## Option A: Inno Setup wrapper (author’s method)
+## ⚠️ Disclaimer
 
-**Script (`dowser.iss`):**
-```pascal
-[Setup]
-AppName=HOI4 Dowser Launcher
-AppVersion=1.0
-DefaultDirName={src}
-DisableStartupPrompt=true
-DisableDirPage=true
-DisableProgramGroupPage=true
-Uninstallable=false
-OutputDir=.
-OutputBaseFilename=dowser
-Compression=lzma
-SolidCompression=true
+- This project is an **unofficial workaround**.  
+- **Use at your own risk.** I am not responsible for any damage, corruption, or bans (although it is highly unlikely as this only replaces the local launcher).  
+- Always **keep a backup** of the original `dowser.exe` (`dowser_original.exe`).  
 
-[Run]
-Filename: "{src}\dowser_original.exe"; Parameters: "--in-process-gpu"; WorkingDir: "{src}"; Flags: shellexec postinstall nowait runhidden
+---
+
+## ❓ FAQ
+
+**Q: Why not just skip the launcher?**  
+A: Skipping works, but you lose **mods and online features**. This fix keeps them functional.
+
+**Q: Can this break multiplayer compatibility?**  
+A: No. The game executable (`hoi4.exe`) is untouched. Only the launcher call is adjusted.
+
+**Q: Does this affect achievements?**  
+A: No. Since Steam integration is preserved, achievements should work as normal.
+
+**Q: What if I want to restore the original launcher?**  
+A: Delete the custom `dowser.exe` and rename `dowser_original.exe` back to `dowser.exe`.
+
+**Q: Can this help on other Paradox games?**  
+A: Probably not needed — EU4, CK3, and others already work with the `--in-process-gpu` parameter directly. HOI4 is the odd one out.
+
+---
+
+## 📝 Notes
+
+This workaround was tested on my system with a **GTX 1060** and **i7 6700k** running **Windows 11 24H2**.  
+It should work on similar setups, but feedback is welcome if you try it on other configurations!
+
+---
