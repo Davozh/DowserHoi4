@@ -1,0 +1,15 @@
+[Setup]
+AppName=HOI4 Dowser Launcher
+AppVersion=1.0
+DefaultDirName={src}
+DisableStartupPrompt=true
+DisableDirPage=true
+DisableProgramGroupPage=true
+Uninstallable=false
+OutputDir=.
+OutputBaseFilename=dowser
+Compression=lzma
+SolidCompression=true
+
+[Run]
+Filename: "{src}\dowser_original.exe"; Parameters: "--in-process-gpu"; WorkingDir: "{src}"; Flags: shellexec postinstall nowait runhidden
