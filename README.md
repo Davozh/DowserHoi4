@@ -1,68 +1,67 @@
-# DowserHoi4
-Fix to run HOI4 launcher with mods on Windows 11 using custom compiled exe
 
+---
 
-Install steps (summary)
+## 2) `README.md` for GitHub repo (complete, step-by-step)
 
-Locate HOI4 game folder:
+```
+# hoi4-dowser-wrapper
+**Unofficial workaround** to make the Paradox HOI4 launcher run under certain Windows 11 setups by launching the original `dowser.exe` with `--in-process-gpu`.
 
-Steam: Right-click HOI4 → Manage → Browse local files
+> ⚠️ **Disclaimer:** This is an unsupported community workaround. Use at your own risk. Always backup original files. Do not redistribute the original `dowser.exe`. Share only scripts/source/wrapper code.
 
-Backup original:
+---
 
-dowser.exe → dowser_backup.exe (or dowser_original.exe)
+## Overview
+Some users have reported that the Hearts of Iron IV Paradox launcher (`dowser.exe`) refuses to open correctly on Windows 11 after an update, while launching `hoi4.exe` directly works (but without Steam/mod integration). This repo documents a practical workaround: replace the `dowser.exe` file with a small wrapper that executes the original `dowser_original.exe` with the `--in-process-gpu` argument. This often makes the launcher initialize correctly via Steam and restores mod/Steam functions.
 
-Put your wrapper dowser.exe (compiled from Inno or C#) in the same folder.
+---
 
-Run Steam as Administrator (recommended) and launch HOI4.
+## Table of contents
+- [Prerequisites](#prerequisites)
+- [How it works](#how-it-works)
+- [Option A: Inno Setup wrapper (used by author)](#option-a-inno-setup-wrapper-used-by-author)
+- [Option B: C# single-file wrapper (recommended)](#option-b-c-single-file-wrapper-recommended)
+- [Install steps](#install-steps)
+- [Rollback / restore original files](#rollback--restore-original-files)
+- [Troubleshooting & tips](#troubleshooting--tips)
+- [Logs & diagnostics to collect](#logs--diagnostics-to-collect)
+- [License & credits](#license--credits)
 
-If it works, the Paradox launcher should open and mods/Steam features should be available.
+---
 
-Rollback / restore original files
+## Prerequisites
+- Windows 10/11 PC with HOI4 installed via Steam.
+- Admin rights to modify files in the game folder.
+- One of:
+  - [Inno Setup](https://jrsoftware.org/isdl.php) (to compile the `.iss` script), **or**
+  - [.NET SDK (6/7/8+)](https://dotnet.microsoft.com/) to compile the C# wrapper.
 
-Exit Steam.
+---
 
-Delete the wrapper dowser.exe.
+## How it works
+1. You rename the original `dowser.exe` to `dowser_original.exe`.
+2. You replace `dowser.exe` with a wrapper executable.
+3. When Steam executes `dowser.exe`, the wrapper immediately starts `dowser_original.exe` with `--in-process-gpu` and exits.
+4. The original launcher runs with the extra parameter and (in many reported cases) initializes correctly, giving full Steam/mod functionality.
 
-Rename dowser_backup.exe or dowser_original.exe back to dowser.exe.
+---
 
-Run Steam and launch the game.
+## Option A: Inno Setup wrapper (author’s method)
 
-Troubleshooting & tips
+**Script (`dowser.iss`):**
+```pascal
+[Setup]
+AppName=HOI4 Dowser Launcher
+AppVersion=1.0
+DefaultDirName={src}
+DisableStartupPrompt=true
+DisableDirPage=true
+DisableProgramGroupPage=true
+Uninstallable=false
+OutputDir=.
+OutputBaseFilename=dowser
+Compression=lzma
+SolidCompression=true
 
-Antivirus warnings: Some AVs may flag unsigned exes. If so, compile locally and whitelist the file. Don’t run binaries from untrusted sources.
-
-Permissions: If launcher still fails, try running Steam as Administrator.
-
-Compatibility flags: In Windows: right-click dowser.exe → Properties → Compatibility → check Disable fullscreen optimizations.
-
-GPU preference: Windows Settings → System → Display → Graphics settings → add dowser.exe and select High performance (dedicated GPU).
-
-If the launcher still crashes: Collect logs from:
-
-%LocalAppData%\Paradox Interactive\launcher-v2\
-
-%LocalAppData%\Paradox Interactive\launcher-v2\chromium-data
-
-If you experience Steam/online problems afterwards: Remove wrapper and restore original dowser.exe.
-
-Logs & diagnostics to collect (if submitting to Paradox)
-
-C:\Users\<yourname>\AppData\Local\Paradox Interactive\launcher-v2\ (all .log)
-
-C:\Users\<yourname>\Documents\Paradox Interactive\Hearts of Iron IV\logs\ (system.log, error.log, exceptions.log)
-
-Output of dxdiag (dxdiag /t dxdiag.txt)
-
-pdx_settings.txt and settings.txt from your Documents folder for HOI4.
-
-FAQ
-
-Q: Is this safe?
-A: Replacing an exe is non-standard and unsupported. It worked for me and several testers, but proceed with caution and backup files.
-
-Q: Can I upload the compiled wrapper here?
-A: You can, but many people prefer to compile on their own machine to avoid AV and trust issues. If you publish a binary, sign it and provide source.
-
-Q: Why not just use Steam launch options?
-A: Steam often calls dowser.exe and does not reliably forward launch args to the launcher, so this wrapper approach ensures required flags are passed.
+[Run]
+Filename: "{src}\dowser_original.exe"; Parameters: "--in-process-gpu"; WorkingDir: "{src}"; Flags: shellexec postinstall nowait runhidden
